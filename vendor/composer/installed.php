@@ -1,12 +1,12 @@
 <?php return array (
   'root' => 
   array (
-    'pretty_version' => '1.0.0+no-version-set',
-    'version' => '1.0.0.0',
+    'pretty_version' => 'dev-master',
+    'version' => 'dev-master',
     'aliases' => 
     array (
     ),
-    'reference' => NULL,
+    'reference' => 'fee3cd391d929d7a76d9b25b2955d28cfd341553',
     'name' => 'laravel/laravel',
   ),
   'versions' => 
@@ -408,12 +408,12 @@
     ),
     'laravel/laravel' => 
     array (
-      'pretty_version' => '1.0.0+no-version-set',
-      'version' => '1.0.0.0',
+      'pretty_version' => 'dev-master',
+      'version' => 'dev-master',
       'aliases' => 
       array (
       ),
-      'reference' => NULL,
+      'reference' => 'fee3cd391d929d7a76d9b25b2955d28cfd341553',
     ),
     'laravel/tinker' => 
     array (
@@ -724,8 +724,8 @@
     array (
       'provided' => 
       array (
-        0 => '1.0|2.0',
-        1 => '1.0.0 || 2.0.0 || 3.0.0',
+        0 => '1.0.0 || 2.0.0 || 3.0.0',
+        1 => '1.0|2.0',
       ),
     ),
     'psr/simple-cache' => 
@@ -1243,6 +1243,15 @@
       array (
       ),
       'reference' => '11cb2199493b2f8a3b53e7f19068fc6aac760991',
+    ),
+    'yajra/laravel-datatables-oracle' => 
+    array (
+      'pretty_version' => 'v9.21.2',
+      'version' => '9.21.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'a7fd01f06282923e9c63fa27fe6b391e21dc321a',
     ),
   ),
 );

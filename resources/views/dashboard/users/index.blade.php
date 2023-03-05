@@ -1,7 +1,9 @@
 @extends('dashboard.layouts.master')
 @section('title', 'List Users')
 @section('css')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css" integrity="sha512-ARJR74swou2y0Q2V9k0GbzQ/5vJ2RBSoCWokg4zkfM29Fb3vZEQyv0iWBMW/yvKgyHSR/7D64pFMmU8nYmbRkg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+<!-- <link rel="stylesheet" href="{{ asset('assets/datatables.net-bs/css/dataTables.bootstrap.min.css') }}"> -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css" integrity="sha512-ARJR74swou2y0Q2V9k0GbzQ/5vJ2RBSoCWokg4zkfM29Fb3vZEQyv0iWBMW/yvKgyHSR/7D64pFMmU8nYmbRkg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
 @endsection
 @section('content')
 <div class="container-fluid">
@@ -37,147 +39,106 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-12 d-flex justify-content-end">
-                    <form action="">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Enter search here.." name="search" value="{{request('search')}}">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit">Search</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <div class="table-responsive">
-                @if($users->count())
-                <table class="table table-bordered" id="usersTable" width="100%" cellspacing="0">
+                <table id="users_table" class="table table-bordered table-hover" style="width:100%">
                     <thead>
                         <th>Firstname</th>
                         <th>Lastname</th>
                         <th>Email</th>
-                        <th>Role</th>
-                        <th>Is Verify</th>
-                        <th>Registered On</th>
+                        <th>Photos</th>
                         <th>Action</th>
                     </thead>
-                    <tbody>
-                        @foreach($users as $user)
-                        <tr>
-                            <td>{{$user->firstname}}</td>
-                            <td>{{$user->lastname}}</td>
-                            <td>{{$user->email}}</td>
-                            <td>
-                                @if($user->roles->count())
-                                <ul>
-                                    @foreach($user->roles as $role_user)
-                                    <li>
-                                        {{$role_user->name}}
-                                    </li>
-                                    @endforeach
-                                </ul>
-                                @else
-                                <p class="text-danger">Haven't role</p>
-                                @endif
-                            </td>
-                            <td>{{$user->is_verify}}</td>
-                            <td>{{$user->created_at}}</td>
-                            <td class="text-center">
-                                <a title="Detail" class="btn btn-warning btn-circle btn-sm" href="{{route('dashboard.user.edit', $user->id)}}">
-                                    <i class="fas fa-pen"></i>
-                                </a>
-                                <form action="{{route('dashboard.user.destroy', $user->id)}}" method="post">
-                                    <button title="Delete" type="button" data-toggle="modal" data-target="#deleteUser{{$user->id}}" data-id="{{$user->id}}" class="btn btn-danger btn-circle btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        <!-- //start Modal Delete -->
-                        <div class="modal fade" id="deleteUser{{$user->id}}" tabindex="-1" role="document" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <form enctype='multipart/form-data' action="{{route('dashboard.user.destroy', $user->id)}}" method="post">
-                                        @csrf
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLongTitle">Delete User {{$user->firstname}} {{$user->lastname}} </h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="form-group">
-                                                <p>Are you sure want to delete user {{$user->firstname}} {{$user->lastname}}?</p>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- //end Modal Delete -->
-                        @endforeach
-                    </tbody>
+                    <tbody></tbody>
                 </table>
-                @else
-                <table class="table table-bordered rolesTable" id="rolesTable" width="100%" cellspacing="0">
-                    <thead>
-                        <th>Name</th>
-                        <th>Created At</th>
-                        <th>Action</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="3">
-                                <p class="text-center text-danger">Data not found</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                @endif
-                <select name="" id="">
-                    @for($x = 1; $x <= $users->total(); $x++)
-                    <option value="">{{$x}}</option>
-                    @endfor
-                </select>
-                <div class="d-flex justify-content-end">
-                    {{ $users->links() }}
-                </div>
-                <div class="d-flex justify-content-left">
-                    Current Page: {{ $users->currentPage() }}
-                </div>
-                <div class="d-flex justify-content-left">
-                    Total Data: {{ $users->total() }}
-                </div>
-                <div class="d-flex justify-content-left">
-                    Per Page: {{ $users->perPage() }}
-                </div>
             </div>
-
         </div>
     </div>
 </div>
-@endsection
 
-@section('js')
-<!-- Page level plugins -->
-<script src="{{asset('assets/vendor/datatables/jquery.dataTables.min.js')}}"></script>
-<script src="{{asset('assets/vendor/datatables/dataTables.bootstrap4.min.js')}}"></script>
+@include('dashboard.users.modal_delete')
 
-<!-- Page level custom scripts -->
-<!-- <script src="{{asset('assets/js/demo/datatables-demo.js')}}"></script> -->
+<!-- //note: JS -->
+<!-- Bootstrap core JavaScript-->
+<script src="{{asset('assets/vendor/jquery/jquery.min.js')}}"></script>
+<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
 
-<!-- <script>
-    $(document).ready(function() {
-        $('#usersTable').DataTable({
-            "aaSorting": [
-                [6, "desc"]
-            ]
-        });
-    });
-</script> -->
+<script type="text/javascript">
+    var table = $('#users_table').DataTable({
+        order: [],
+        'processing': true,
+        'serverSide': true,
+        'ajax': {
+            url: "{{ route('dashboard.user.index_data') }}",
+        },
+        'dataType': 'json',
+        'paging': true,
+        'lengthChange': true,
+        'columns': [{
+                data: 'firstname',
+                name: 'firstname'
+            },
+            {
+                data: 'lastname',
+                name: 'lastname'
+            },
+            {
+                data: 'email',
+                name: 'email'
+            },
+            {
+                data: 'image',
+                name: 'image'
+            },
+            {
+                data: 'action',
+                name: 'action'
+            },
+        ],
+    })
+
+    // todo: direct to edit data user
+    function editData(id) {
+        let url = "{{url('dashboard/users/edit')}}" + '/' + id;
+        window.location.href = url;
+    }
+
+    // todo: Show modal delete
+    function showModalDelete(id) {
+        $('#modalDelete').modal('show');
+        $('#id_user').val(id);
+    }
+
+    // todo: action delete user
+    function deleteData() {
+        $('#modalDelete').modal('show');
+        let id_user = $('#id_user').val();
+        if (id_user) {
+            $('#modalDelete').modal('hide');
+            $.ajax({
+                url: "{{url('dashboard/users/delete')}}" + '/' + id_user,
+                type: "POST",
+                data: {
+                    '_token': '{{csrf_token()}}'
+                },
+                success: function(response) {
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Delete User',
+                        text: response.message,
+                        timer: 3000,
+                        showCancelButton: false,
+                    })
+                    table.ajax.reload();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.fire({
+                        type: 'error',
+                        title: 'Login Gagal!',
+                        text: response.message
+                    });
+                }
+            });
+        }
+    }
+</script>
 @endsection

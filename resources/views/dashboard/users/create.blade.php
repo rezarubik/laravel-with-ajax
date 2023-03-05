@@ -39,24 +39,11 @@
                     </div>
                 </div>
                 <!-- //note: Body -->
-                <div class="card-body">
-                    <form enctype='multipart/form-data' action="{{route('dashboard.user.store')}}" method="post" autocomplete="off">
-                        @csrf
+                <div class="card-body" id="formStoreUser">
+                    <form action="#" method="post" enctype="multipart/form-data">
+                        {{csrf_field()}}
                         <div class="row">
                             <div class="col-md-6 col-xs-12">
-                                <div class="form-group">
-                                    <label for="region">Role</label>
-                                    <select multiple name="id_role[]" id="id_role" class="form-control selectpicker @error('id_role') is-invalid  @enderror" data-live-search="true" data-style="btn-light">
-                                        @foreach($roles as $role)
-                                        <option value="{{$role->name}}" {{(collect(old('id_role'))->contains($role->id)) ? 'selected' : ''}}>{{$role->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_role')
-                                    <div class="invalid-feedback">
-                                        {{$message }}
-                                    </div>
-                                    @enderror
-                                </div>
                                 <div class="form-group">
                                     <label for="firstname">Firstname</label>
                                     <input id="firstname" type="text" class="form-control @error('firstname') is-invalid  @enderror" placeholder="Enter firstname here" name="firstname" value="{{old('firstname')}}">
@@ -103,70 +90,94 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="col-md-6 col-xs-12">
+                                <div class="form-group">
+                                    <label for="foto">Foto</label>
+                                    <input id="foto" type="file" class="form-control upload-photo" name="foto" accept="image/jpeg, image/jpg, image/png">
+                                </div>
+                                <div class="form-group">
+                                    <label for="preview">Preview Foto</label>
+                                    <div class="preview-photo">
+                                        <img src="{{asset('assets/img/img-preview.svg')}}" class="preview-image" alt="" width="200px" height="200px">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <hr class="sidebar-divider d-none d-md-block">
-                        <button type="submit" class="btn btn-md btn-primary float-right">
-                            <i class="fas fa-solid fa-save"></i> Save
-                        </button>
                     </form>
+                    <hr class="sidebar-divider d-none d-md-block">
+                    <button href="#" id="create_user" class="btn btn-md btn-primary float-right">
+                        <i class="fas fa-solid fa-save"></i> Save
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     <!-- //end: detail user -->
 
-    <!-- //start: detail address -->
-
-    <!-- //end: detail address -->
-
 </div>
 
+<!-- Bootstrap core JavaScript-->
+<script src="{{asset('assets/vendor/jquery/jquery.min.js')}}"></script>
 <!-- //todo javascript -->
-<script src="{{asset('ckeditor/ckeditor.js')}}"></script>
-<script>
-    function replaceChars(entry) {
-        temp = "" + entry; // temporary holder
-        document.getElementById('descriptionHidden').value = (temp);
-    }
-
-    var description = document.getElementById("description");
-
-    CKEDITOR.replace(description, {
-        language: 'en-gb'
-    });
-    CKEDITOR.config.allowedContent = true;
-
-    function upload() {
-        $("#image").click();
-    }
-
-    // todo remove image
-    function remove() {
-        $('#image').replaceWith(selected_photo = $('#image').clone(true));
-        $('#preview_img').attr('src', `{{URL::asset('placeholder.png')}}`);
-        $('#oldImage_1').val('');
-    }
-
-    async function preview_image(input) {
-        if (input.files[0].size > 5000000) {
-            swal({
-                title: "Oops!",
-                text: "Maximum size is 5MB",
-                icon: "error",
-            });
-            return;
-        }
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                $('#preview_img').attr('src', e.target.result);
+<script type="text/javascript">
+    $('#create_user').click(function(error) {
+        error.preventDefault();
+        let url = "{{route('dashboard.user.store')}}";
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: new FormData($("#formStoreUser form")[0]),
+            processData: false,
+            contentType: false,
+            async: false,
+            success: function(response) {
+                if (response.status) {
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Create User Successfully',
+                        text: response.message,
+                        timer: 3000,
+                        showCancelButton: false,
+                    }).then(function() {
+                        window.location.href = "{{route('dashboard.user.index')}}";
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: 'Failed',
+                        text: response.message
+                    });
+                }
             }
-            reader.readAsDataURL(input.files[0]); // convert to base64 string
-        } else {
-            console.log('kosong');
-        }
-    }
+        })
+    });
 </script>
+<script>
+    let inputFile;
+    let uploadPhoto = document.querySelector(".upload-photo");
+    let previewImage = document.querySelector(".preview-image");
+
+    uploadPhoto.addEventListener("change", function() {
+        inputFile = this.files[0];
+        previewPhoto();
+    });
+
+    function previewPhoto() {
+        let fileType = inputFile.type;
+        let validExtensions = ["image/jpeg", "image/jpg", "image/png"];
+
+        if (validExtensions.includes(fileType)) {
+            let fileReader = new FileReader();
+
+            fileReader.onload = () => {
+                let fileURL = fileReader.result;
+                previewImage.src = fileURL;
+            }
+            fileReader.readAsDataURL(inputFile);
+        }
+    };
+</script>
+
 @endsection
 
 @section('js')

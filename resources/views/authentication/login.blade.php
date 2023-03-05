@@ -97,8 +97,6 @@
     <!-- Sweet Alert -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js"></script>
 
-
-    <!-- //note: Script for login post action -->
     <script type="text/javascript">
         // todo: Login action
         $('#submit_login').click(function(error) {

@@ -38,8 +38,9 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
 
     Route::prefix('users')->group(function () {
         Route::get('', 'UserController@index')->name('dashboard.user.index');
+        Route::get('index-data', 'UserController@index_data')->name('dashboard.user.index_data');
         Route::get('create', 'UserController@create')->name('dashboard.user.create');
-        Route::get('edit/{id}', 'UserController@edit')->name('dashboard.user.edit');
+        Route::get('edit/{id}', 'UserController@edit')->name('edit');
         Route::post('store', 'UserController@store')->name('dashboard.user.store');
         Route::post('update/{id}', 'UserController@update')->name('dashboard.user.update');
         Route::post('delete/{id}', 'UserController@destroy')->name('dashboard.user.destroy');

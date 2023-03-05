@@ -1,5 +1,8 @@
 <!-- Sweet Alert -->
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async></script>
+<!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js" async></script> -->
+
+<!-- Sweet Alert -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js"></script>
 
 <!-- Bootstrap core JavaScript-->
 <script src="{{asset('assets/vendor/jquery/jquery.min.js')}}"></script>
@@ -25,8 +28,6 @@
 <script src="{{asset('js/dashboard.js')}}"></script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 <script type="text/javascript" src="{{asset('js/map.js')}}"></script>
-<script
-    src=" https://maps.googleapis.com/maps/api/js?key=AIzaSyCuLLX57qWxuKkqQaoG1L3uXdF2xRXQMVs&callback=initMap&v=weekly"
-    defer></script>
+<script src=" https://maps.googleapis.com/maps/api/js?key=AIzaSyCuLLX57qWxuKkqQaoG1L3uXdF2xRXQMVs&callback=initMap&v=weekly" defer></script>
 
 @yield('js')

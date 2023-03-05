@@ -6,10 +6,14 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Role;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use DataTables;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -28,7 +32,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index_old()
     {
         if ($this->getPermission()['view users']->isEmpty()) {
             abort(403, 'Unauthorized action.');
@@ -37,6 +41,41 @@ class UserController extends Controller
         $total_user = $users->total();
         // return $users->total();
         return view('dashboard.users.index', compact('users', 'total_user'));
+    }
+
+    public function index(Request $request)
+    {
+        return view('dashboard.users.index');
+    }
+
+    /**
+     * NOTE: Get data Users
+     * * Route: /users/all-data
+     */
+    public function index_data(Request $request)
+    {
+        $users = User::all();
+
+        return DataTables::of($users)
+            ->addColumn('image', function ($users) {
+                return '
+                <div class="text-center">
+                    <img src="' . $users->image . '" class="rounded" alt="..." width="200px" height="200px">
+                </div>
+                ';
+            })
+            ->addColumn('action', function ($users) {
+                return '
+                <div class="display-actions" style="justify-content: flex-start;">
+                    <a title="Edit" class="btn btn-warning btn-circle btn-sm" onclick="editData(' . $users->id . ')">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    <a title="Delete" class="btn btn-danger btn-circle btn-sm" onclick="showModalDelete(' . $users->id . ')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+                ';
+            })->escapeColumns([])->make(true);
     }
 
     public function index_operationals()
@@ -63,33 +102,54 @@ class UserController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * RegisterRequest
      */
-    public function store(RegisterRequest $request)
+    public function store(Request $request)
     {
         try {
             DB::beginTransaction();
             $check_user = User::where('email', $request->email)->first();
             if ($check_user) {
-                return redirect()->route('dashboard.user.create')->with('error', 'User is exists')->withInput();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User is exists'
+                ]);
+                // return redirect()->route('dashboard.user.create')->with('error', 'User is exists')->withInput();
             }
-            // return 'stop';
             if ($request->password !== $request->confirm) {
-                return redirect()->route('dashboard.user.create')->with('error', 'Password not match')->withInput();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Password not match'
+                ]);
+                // return redirect()->route('dashboard.user.create')->with('error', 'Password not match')->withInput();
+            }
+            // todo: save foto
+            $fileName = '-';
+            if ($request->file('foto')) {
+                $dt = Carbon::now();
+                $extension = $request->file('foto')->getClientOriginalExtension();
+                $fileName = Str::random(16) . '-' . $dt->format('Y-m-d') . '-photo-' . '.' . $extension;
+                Storage::disk('user-photo')->put($fileName, file_get_contents($request->file('foto')));
             }
             $data = [
                 'firstname' => $request->firstname,
-                'lastname' => $request->lastname,
+                'lastname' => $request->lastname ? $request->lastname : '',
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'image' => $fileName
             ];
             $new_user = User::create($data);
 
-            $roles = $request->id_role;
-            if ($roles) {
-                $new_user->assignRole($roles);
-            }
+            // $roles = $request->id_role;
+            // if ($roles) {
+            //     $new_user->assignRole($roles);
+            // }
             DB::commit();
-            return redirect()->route('dashboard.user.index')->with('status', 'Success create user');
+            return response()->json([
+                'status' => true,
+                'message' => 'User created successfully'
+            ]);
+            // return redirect()->route('dashboard.user.index')->with('status', 'Success create user');
         } catch (\Throwable $th) {
             DB::rollback();
             return response()->json([
@@ -146,29 +206,44 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             DB::beginTransaction();
             $user = User::find($id);
-            $roles = $request->id_role;
-            if (!$roles) {
-                return redirect()->route('dashboard.user.edit', $id)->with('error', 'Please choose the role');
-            }
             $check_email_user = User::where('email', $request->email)->first();
             if ($check_email_user && $check_email_user->email !== $user->email) {
-                return redirect()->route('dashboard.user.edit', $id)->with('error', 'Email already exists');
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Email already exists'
+                ]);
+                // return redirect()->route('dashboard.user.edit', $id)->with('error', 'Email already exists');
+            }
+            // todo: update foto
+            if ($request->file('foto')) {
+                $basename = basename($user->image);
+                if (!empty($user->image) && ($basename != 'default.jpg')) {
+                    Storage::disk('user-photo')->delete($basename);
+                }
+                $dt = Carbon::now();
+                $extension = $request->file('foto')->getClientOriginalExtension();
+                $fileName = Str::random(16) . '-' . $dt->format('Y-m-d') . '-photo-' . '.' . $extension;
+                Storage::disk('user-photo')->put($fileName, file_get_contents($request->file('foto')));
             }
             $data = [
                 'firstname' => $request->firstname,
                 'lastname' => $request->lastname,
                 'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'image' => $fileName
             ];
             $user->update($data);
-            // todo: sync role / update role
-            $user->syncRoles($request->id_role);
             DB::commit();
-            return redirect()->route('dashboard.user.edit', $id)->with('status', 'Success update user');
+            return response()->json([
+                'status' => true,
+                'message' => 'Success update user'
+            ]);
+            // return redirect()->route('dashboard.user.edit', $id)->with('status', 'Success update user');
         } catch (\Throwable $th) {
             DB::rollback();
             return response()->json([
@@ -191,7 +266,11 @@ class UserController extends Controller
             $user = User::find($id);
             $user->delete();
             DB::commit();
-            return redirect()->route('dashboard.user.index')->with('status', 'Success delete user');
+            return response()->json([
+                'status' => true,
+                'message' => 'Success delete user'
+            ]);
+            // return redirect()->route('dashboard.user.index')->with('status', 'Success delete user');
         } catch (\Throwable $th) {
             DB::rollback();
             return response()->json([

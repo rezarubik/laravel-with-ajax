@@ -39,21 +39,13 @@
                     </div>
                 </div>
                 <!-- //note: Body -->
-                <div class="card-body">
-                    <form enctype='multipart/form-data' action="{{route('dashboard.user.update', $user->id)}}" method="post" autocomplete="off">
+                <div class="card-body" id="formUpdateUser">
+                    <form enctype='multipart/form-data' method="post" autocomplete="off">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 col-xs-12">
-
-                                <label for="region">Roles</label>
-                                <select multiple name="id_role[]" id="roles" class="form-control selectpicker" data-live-search="true" data-style="btn-light">
-                                    @foreach($roles as $role)
-                                    <option value="{{$role->name}}" {{collect($id_roles)->contains($role->id) ? 'selected' : ''}}>{{$role->name}}</option>
-                                    @endforeach
-                                </select>
-                                <!-- <small id="regionHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
-
                                 <div class="form-group">
+                                    <input type="hidden" id="id" value="{{$user->id}}">
                                     <label for="firstname">Firstname</label>
                                     <input id="firstname" type="text" class="form-control @error('firstname') is-invalid  @enderror" placeholder="Enter firstname here" name="firstname" value="{{$user->firstname}}">
                                     @error('firstname')
@@ -80,10 +72,27 @@
                                     </div>
                                     @enderror
                                 </div>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input id="password" type="password" class="form-control" placeholder=" Enter password here" name="password" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-xs-12">
+                                <div class="form-group">
+                                    <label for="foto">Foto</label>
+                                    <input id="foto" type="file" class="form-control upload-photo" name="foto" accept="image/jpeg, image/jpg, image/png"">
+                                </div>
+                                <div class=" form-group">
+                                    <label for="preview">Preview Foto</label>
+                                    <div class="preview-photo">
+                                        <!-- <img src="{{asset('assets/img/img-preview.svg')}}" class="preview-image" alt="" width="200px" height="200px"> -->
+                                        <img src="{{ $user->image }}" class="preview-image" alt="Gambar" width="200px" height="200px">
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <hr class="sidebar-divider d-none d-md-block">
-                        <button type="submit" class="btn btn-md btn-primary float-right">
+                        <hr class=" sidebar-divider d-none d-md-block">
+                        <button id="update_user" class="btn btn-md btn-primary float-right">
                             <i class="fas fa-solid fa-save"></i> Save
                         </button>
                     </form>
@@ -93,9 +102,68 @@
     </div>
     <!-- //end: detail user -->
 
-    <!-- //start: detail address -->
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{asset('assets/vendor/jquery/jquery.min.js')}}"></script>
+    <!-- //todo javascript -->
+    <script type="text/javascript">
+        $('#update_user').click(function(error) {
+            error.preventDefault();
+            let id = $('#id').val();
+            let url = "{{url('dashboard/users/update')}}" + '/' + id;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: new FormData($("#formUpdateUser form")[0]),
+                processData: false,
+                contentType: false,
+                async: false,
+                success: function(response) {
+                    if (response.status) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Successfully',
+                            text: response.message,
+                            timer: 3000,
+                            showCancelButton: false,
+                        }).then(function() {
+                            window.location.href = "{{route('dashboard.user.index')}}";
+                        });
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: 'Failed',
+                            text: response.message
+                        });
+                    }
+                }
+            })
+        });
+    </script>
+    <script>
+        let inputFile;
+        let uploadPhoto = document.querySelector(".upload-photo");
+        let previewImage = document.querySelector(".preview-image");
 
-    <!-- //end: detail address -->
+        uploadPhoto.addEventListener("change", function() {
+            inputFile = this.files[0];
+            previewPhoto();
+        });
+
+        function previewPhoto() {
+            let fileType = inputFile.type;
+            let validExtensions = ["image/jpeg", "image/jpg", "image/png"];
+
+            if (validExtensions.includes(fileType)) {
+                let fileReader = new FileReader();
+
+                fileReader.onload = () => {
+                    let fileURL = fileReader.result;
+                    previewImage.src = fileURL;
+                }
+                fileReader.readAsDataURL(inputFile);
+            }
+        };
+    </script>
 
 </div>
 

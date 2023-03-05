@@ -11,10 +11,6 @@
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOperationalMenus" aria-expanded="true" aria-controls="collapseOperationalMenus">
-            <i class="fas fa-fw fa-cog"></i>
-            <span>Operational Menus</span>
-        </a>
         <div id="collapseOperationalMenus" class="collapse {{request()->route()->getPrefix()=='dashboard/users/operationals' ? 'show' : ''}}" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item {{Route::currentRouteName()=='dashboard.user.create' ? 'active' : ''}}" href="{{route('dashboard.operational.index')}}">
@@ -29,7 +25,7 @@
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true" aria-controls="collapseSettings">
             <i class="fas fa-fw fa-cog"></i>
-            <span>Settings</span>
+            <span>Users</span>
         </a>
         <div id="collapseSettings" class="collapse {{request()->route()->getPrefix()=='dashboard/users' || request()->route()->getPrefix()=='dashboard/users/roles' || request()->route()->getPrefix()=='dashboard/users/permissions' ? 'show' : ''}}" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
@@ -41,18 +37,6 @@
                 <a class="collapse-item {{Route::currentRouteName()=='dashboard.user.index' ? 'active' : ''}}" href="{{route('dashboard.user.index')}}">
                     <i class="fas fa-fw fa-user"></i>
                     <span>Users</span>
-                </a>
-                @endcan
-                @can('view roles')
-                <a class="collapse-item {{Route::currentRouteName()=='dashboard.role.index' ? 'active' : ''}}" href="{{route('dashboard.role.index')}}">
-                    <i class="fas fa-fw fa-user"></i>
-                    <span>Roles</span>
-                </a>
-                @endcan
-                @can('view permissions')
-                <a class="collapse-item {{Route::currentRouteName()=='dashboard.permission.index' ? 'active' : ''}}" href="{{route('dashboard.permission.index')}}">
-                    <i class="fas fa-fw fa-lock"></i>
-                    <span>Permission</span>
                 </a>
                 @endcan
             </div>

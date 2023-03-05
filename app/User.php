@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -17,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'firstname', 'lastname', 'email', 'password', 'validation_code'
+        'firstname', 'lastname', 'email', 'password', 'validation_code', 'image'
     ];
 
     protected $appends = [
@@ -64,5 +65,15 @@ class User extends Authenticatable
     public function getPermissionAttribute()
     {
         return $this->getAllPermissions();
+    }
+
+    public function getImageAttribute()
+    {
+        $image = 'default.png';
+        if (strlen($this->attributes['image']) > 0) {
+            $image = $this->attributes['image'];
+        }
+
+        return Storage::disk('user-photo')->url($image);
     }
 }
